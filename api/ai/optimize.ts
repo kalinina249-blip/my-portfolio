@@ -1,36 +1,20 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import express from "express";
-import path from "path";
-import dotenv from "dotenv";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { GoogleGenAI, Type } from "@google/genai";
-import { createServer as createViteServer } from "vite";
 
-// Load environment variables
-dotenv.config();
-
-const app = express();
-const PORT = parseInt(process.env.PORT || "3000", 10);
-
-app.use(express.json());
-
-// Lazy-initialized Gemini Client
+// Pre-initialize or lazy-initialize Gemini Client
 let aiClient: GoogleGenAI | null = null;
 
 function getGeminiClient(): GoogleGenAI {
   if (!aiClient) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is missing. Please add it in Settings > Secrets.");
+      throw new Error("GEMINI_API_KEY is missing. Please add it in your Vercel Project Settings > Environment Variables.");
     }
     aiClient = new GoogleGenAI({
       apiKey,
       httpOptions: {
         headers: {
-          "User-Agent": "aistudio-build",
+          "User-Agent": "aistudio-build-vercel",
         },
       },
     });
@@ -38,8 +22,13 @@ function getGeminiClient(): GoogleGenAI {
   return aiClient;
 }
 
-// API: AI Optimization for marketplaces
-app.post("/api/ai/optimize", async (req, res) => {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Guard for POST request only
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
+
   try {
     const { productName, productDesc, platform } = req.body;
 
@@ -125,35 +114,12 @@ app.post("/api/ai/optimize", async (req, res) => {
     }
 
     const parsedData = JSON.parse(responseText.trim());
-    return res.json(parsedData);
+    return res.status(200).json(parsedData);
   } catch (error: any) {
-    console.error("AI Optimization failed:", error);
+    console.error("AI Optimization failed under Vercel Serverless Function:", error);
     return res.status(500).json({
       error: error.message || "Internal Server Error",
-      details: "Could not optimize listing. Check that GEMINI_API_KEY is configured."
+      details: "Could not optimize listing under serverless function. Check GEMINI_API_KEY environment variable."
     });
   }
-});
-
-// Configure Vite or Static Files
-async function start() {
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
-  }
-
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Express server and Vite development mounting at http://localhost:${PORT}`);
-  });
 }
-
-start();

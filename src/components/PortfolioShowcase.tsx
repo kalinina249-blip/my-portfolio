@@ -17,50 +17,76 @@ interface PortfolioItem {
   ctrBefore: string;
   ctrAfter: string;
   salesBoost: string;
+  problem: string;
+  solution: string;
+  prompt: string;
 }
 
 export function PortfolioShowcase() {
-  const [activeItem, setActiveItem] = useState<string>("backpack");
+  const [activeItem, setActiveItem] = useState<string>("perfume");
   const [sliderPosition, setSliderPosition] = useState<number>(50);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isSliding, setIsSliding] = useState<boolean>(false);
+  const [containerWidth, setContainerWidth] = useState<number>(500);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    setContainerWidth(containerRef.current.getBoundingClientRect().width);
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const portfolioItems: Record<string, PortfolioItem> = {
-    backpack: {
-      id: "backpack",
-      name: "Кожаный Рюкзак 'Aero Urban'",
-      category: "Wildberries / Аксессуары",
-      beforeUrl: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=60&w=800", // Standard warehouse backpack
-      afterUrl: "https://images.unsplash.com/photo-1622560480654-d96214fdc887?auto=format&fit=crop&q=80&w=800", // Breathtaking product studio
-      beforeLabel: "Обычное фото со склада",
-      afterLabel: "AI Студийная интеграция Калининой",
-      ctrBefore: "2.1% CTR",
-      ctrAfter: "5.8% CTR",
-      salesBoost: "x2.7 Продаж",
+    perfume: {
+      id: "perfume",
+      name: "Парфюм 'Oud Majestic Noir'",
+      category: "Лэтуаль / Селективный парфюм",
+      beforeUrl: "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&q=80&w=800",
+      afterUrl: "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=800",
+      beforeLabel: "Обычное стоковое фото",
+      afterLabel: "Премиум Ребрендинг (AI)",
+      ctrBefore: "1.5% CTR",
+      ctrAfter: "5.7% CTR",
+      salesBoost: "x3.8 Продаж",
+      problem: "Каталожное статичное изображение флакона на простом однотонном фоне выглядело ординарно и не передавало ощущение богатства шлейфа и элитного характера аромата.",
+      solution: "С помощью ИИ спроектирована кинематографичная темная композиция в стиле премиум-брендов: флакон парфюма грациозно стоит на черном вулканическом камне, окутанный тонкими струйками дыма и золотистыми каплями утренней росы.",
+      prompt: "Luxury majestic black perfume bottle with golden details, nested on a sleek raw textured piece of dark obsidian volcanic rock, mysterious foggy atmosphere, golden sparks floating around, hyper-detail 8k resolution --ar 4:5",
     },
     watch: {
       id: "watch",
-      name: "Умные Часы 'Quantum V'",
-      category: "Ozon / Электроника",
-      beforeUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=60&w=800", // Plain watch
-      afterUrl: "https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?auto=format&fit=crop&q=80&w=800", // Premium dynamic watch
-      beforeLabel: "Любительский кадр Ozon",
-      afterLabel: "Космический 3D AI рендер",
+      name: "Умные Часы 'Smart Quantum'",
+      category: "Wildberries / Электроника",
+      beforeUrl: "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?auto=format&fit=crop&q=60&w=800",
+      afterUrl: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&q=80&w=800",
+      beforeLabel: "Быстрый кадр Ozon",
+      afterLabel: "Студийный 3D ИИ-рендер",
       ctrBefore: "1.4% CTR",
       ctrAfter: "4.9% CTR",
       salesBoost: "x3.5 Продаж",
+      problem: "Обычный любительский кадр смарт-часов на руке прохожего не выделял их премиальные материалы и выглядел уныло среди карточек дистрибьюторов.",
+      solution: "С помощью ИИ разработан глянцевый 3D-рендер часов в невесомости с неоновыми отражениями, космической пылью и четкими профессиональными текстурами.",
+      prompt: "Premium floating 3D render of a minimalist silver smartwatch with white band, cinematic gloss reflections, microparticles on professional abstract black background, volumetric lighting, hyper-detail 8k resolution --ar 4:5",
     },
     serum: {
       id: "serum",
       name: "Сыворотка 'Eco Peptide'",
       category: "Яндекс.Маркет / Косметика",
-      beforeUrl: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&q=60&w=800", // Cosmetic on white
-      afterUrl: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=800", // Water elements botanical background
+      beforeUrl: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&q=60&w=800",
+      afterUrl: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=800",
       beforeLabel: "Простой дистрибьюторский сток",
       afterLabel: "Органическая композиция AI",
       ctrBefore: "1.9% CTR",
       ctrAfter: "5.1% CTR",
       salesBoost: "x2.4 Продаж",
+      problem: "Каталожное белое фото стеклянной баночки выглядело скучно и не ассоциировалось с природными, органическими свойствами омолаживающей сыворотки.",
+      solution: "ИИ реконструировал сочный природный ландшафт с влажным мхом, каплями утренней росы и зелеными чайными листьями, подчеркнув статус премиальной эко-косметики.",
+      prompt: "Luxury cosmetic glass serum bottle, placed on organic moss and wet wooden elements, surrounded by fresh tea leaves, splashing water drops, morning sun rays, macro photography, hyper-detail 8k resolution --ar 4:5",
     },
   };
 
@@ -154,7 +180,7 @@ export function PortfolioShowcase() {
         <div className="lg:col-span-7 flex flex-col gap-3">
           <div
             ref={containerRef}
-            className="w-full aspect-[4/5] sm:aspect-[4/3] max-h-[500px] bg-[#0d0d0d] rounded-2xl border border-white/10 relative overflow-hidden select-none cursor-ew-resize touched-action-none shadow-2xl"
+            className="w-full aspect-[4/5] sm:aspect-[4/3] max-h-[500px] bg-[#0d0d0d] rounded-2xl border border-white/10 relative overflow-hidden select-none cursor-ew-resize touch-action-none shadow-2xl"
             onMouseDown={() => setIsSliding(true)}
             onTouchStart={() => setIsSliding(true)}
           >
@@ -175,8 +201,11 @@ export function PortfolioShowcase() {
               className="absolute inset-y-0 left-0 right-0 overflow-hidden pointer-events-none"
               style={{ width: `${sliderPosition}%` }}
             >
-              {/* Force rendering standard width to prevent stretching */}
-              <div className="absolute inset-y-0 left-0 w-[400px] sm:w-[500px] md:w-[600px] lg:w-[700px] h-full">
+              {/* Force rendering dynamic width to prevent stretching */}
+              <div 
+                className="absolute inset-y-0 left-0 h-full"
+                style={{ width: `${containerWidth}px` }}
+              >
                 <img
                   src={item.beforeUrl}
                   alt="До оптимизации"
@@ -248,26 +277,26 @@ export function PortfolioShowcase() {
                 </span>
               </div>
               <p className="font-mono text-[11px] text-white/75 bg-black/45 p-3 rounded-xl border border-white/10 italic leading-relaxed">
-                "Premium product photography of {item.id === "backpack" ? "leather urban backpack" : item.id === "watch" ? "minimalist smartwatch" : "luxury cosmetic glass capsule bottle"}, placed on a dark sleek architectural slate rock, raw wet textures, cinematic studio lighting, volumetric realistic mist, hyper-detail 8k resolution --ar 4:5"
+                "{item.prompt}"
               </p>
             </div>
 
             {/* Tatiana's Execution Commentary */}
             <div className="space-y-3.5">
               <div className="flex gap-3">
-                <div className="h-5 w-5 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center shrink-0 mt-0.5">
-                  <Check size={11} />
+                <div className="h-5.5 w-5.5 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center shrink-0 mt-0.5">
+                  <Check size={11} className="text-emerald-400" />
                 </div>
                 <p className="text-xs text-white/70 leading-relaxed font-sans">
-                  <strong>Проблема:</strong> Обычные складские превью собирали менее 1.5% переходов. Клиенты Ozon и Wildberries не понимали премиальной текстуры изделия.
+                  <strong>Проблема:</strong> {item.problem}
                 </p>
               </div>
               <div className="flex gap-3">
-                <div className="h-5 w-5 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center shrink-0 mt-0.5">
-                  <Check size={11} />
+                <div className="h-5.5 w-5.5 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center shrink-0 mt-0.5">
+                  <Check size={11} className="text-blue-400" />
                 </div>
                 <p className="text-xs text-white/70 leading-relaxed font-sans">
-                  <strong>Решение Татьяны:</strong> Настроены фотореалистичные контентные пайплайны. Товар интегрирован в премиум ландшафт с правильной тенью и инфографикой, заменяющей дорогие съёмки.
+                  <strong>Решение Татьяны:</strong> {item.solution}
                 </p>
               </div>
             </div>

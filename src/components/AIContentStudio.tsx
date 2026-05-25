@@ -112,9 +112,41 @@ export function AIContentStudio() {
   };
 
   const handleCopy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedKey(id);
-    setTimeout(() => setCopiedKey(null), 1500);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(() => {
+            setCopiedKey(id);
+            setTimeout(() => setCopiedKey(null), 1500);
+          })
+          .catch(() => {
+            // Fallback copy
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textArea);
+            setCopiedKey(id);
+            setTimeout(() => setCopiedKey(null), 1550);
+          });
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        setCopiedKey(id);
+        setTimeout(() => setCopiedKey(null), 1500);
+      }
+    } catch (e) {
+      console.warn("Failed to copy text using clipboard API:", e);
+    }
   };
 
   return (
